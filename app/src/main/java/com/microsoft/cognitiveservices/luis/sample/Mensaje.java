@@ -1,8 +1,5 @@
-package com.android.exemple.james;
+package com.microsoft.cognitiveservices.luis.sample;
 
-/**
- * Created by Angel E. Retana on 11/07/2018.
- */
 
 public class Mensaje {
     private String Nombre,Mensaje;

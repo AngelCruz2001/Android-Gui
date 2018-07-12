@@ -1,4 +1,4 @@
-package com.android.exemple.james;
+package com.microsoft.cognitiveservices.luis.sample;
 
 import android.app.Activity;
 import android.content.ActivityNotFoundException;

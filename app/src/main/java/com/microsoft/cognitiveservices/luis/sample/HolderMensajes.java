@@ -1,12 +1,9 @@
-package com.android.exemple.james;
+package com.microsoft.cognitiveservices.luis.sample;
 
 import android.support.v7.widget.RecyclerView;
 import android.view.View;
 import android.widget.TextView;
 
-/**
- * Created by Angel E. Retana on 11/07/2018.
- */
 
 public class HolderMensajes extends RecyclerView.ViewHolder {
     private TextView Nombre;

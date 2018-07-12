@@ -1,4 +1,4 @@
-package com.android.exemple.james;
+package com.microsoft.cognitiveservices.luis.sample;
 
 import android.content.Context;
 import android.support.annotation.NonNull;
@@ -10,9 +10,7 @@ import android.view.ViewGroup;
 import java.util.ArrayList;
 import java.util.List;
 
-/**
- * Created by Angel E. Retana on 11/07/2018.
- */
+
 
 public class AdapterMensajes extends RecyclerView.Adapter<HolderMensajes>{
 

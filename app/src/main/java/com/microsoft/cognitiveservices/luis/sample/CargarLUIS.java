@@ -32,7 +32,6 @@ public class CargarLUIS {
     }
 
 
-
     public String[] getEntidades() {
         return Entidades;
     }
