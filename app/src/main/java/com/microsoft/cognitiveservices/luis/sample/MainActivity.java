@@ -1,129 +1,101 @@
-package com.microsoft.cognitiveservices.luis.sample;
+package com.android.exemple.james;
 
+import android.app.Activity;
+import android.content.ActivityNotFoundException;
+import android.content.Context;
 import android.content.Intent;
+import android.speech.RecognizerIntent;
 import android.support.v7.app.AppCompatActivity;
 import android.os.Bundle;
+import android.support.v7.widget.LinearLayoutManager;
+import android.support.v7.widget.RecyclerView;
 import android.view.View;
-import android.widget.Button;
 import android.widget.EditText;
-import android.widget.ScrollView;
+import android.widget.LinearLayout;
 import android.widget.TextView;
+import android.widget.Toast;
 
-import com.microsoft.cognitiveservices.luis.clientlibrary.LUISClient;
-import com.microsoft.cognitiveservices.luis.clientlibrary.LUISDialog;
-import com.microsoft.cognitiveservices.luis.clientlibrary.LUISEntity;
-import com.microsoft.cognitiveservices.luis.clientlibrary.LUISIntent;
-import com.microsoft.cognitiveservices.luis.clientlibrary.LUISResponse;
-import com.microsoft.cognitiveservices.luis.clientlibrary.LUISResponseHandler;
+import java.util.ArrayList;
 
-import java.util.List;
+public class MainActivity extends Activity {
 
-public class MainActivity extends AppCompatActivity {
+    private RecyclerView recyclerView;
+    private AdapterMensajes adapter;
 
-    LUISResponse previousResponse = null;
-    String chatText = "";
+    private static final int RECOGNIZE_SPEECH_ACTIVITY = 1;
+
 
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
         setContentView(R.layout.activity_main);
 
-        Button btnPredict = (Button) findViewById(R.id.buttonPredict);
-        Button btnReply = (Button) findViewById(R.id.buttonReply);
-        final EditText editTextAppId = (EditText) findViewById(R.id.editTextAppId);
-        final EditText editTextAppKey = (EditText) findViewById(R.id.editTextAppKey);
-        final EditText editTextPredict = (EditText) findViewById(R.id.editTextPredict);
 
-        btnPredict.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                String appId = String.valueOf(editTextAppId.getText());
-                String appKey = String.valueOf(editTextAppKey.getText());
-                String textPredict = String.valueOf(editTextPredict.getText());
-                try {
-                    LUISClient client = new LUISClient(appId, appKey, true);
-                    client.predict(textPredict, new LUISResponseHandler() {
-                        @Override
-                        public void onSuccess(LUISResponse response) {
-                            processResponse(response);
-                        }
+        recyclerView=(RecyclerView)findViewById(R.id.lista);
+        adapter=new AdapterMensajes(this);
+        LinearLayoutManager l = new LinearLayoutManager(this);
+        recyclerView.setLayoutManager(l);
+        recyclerView.setAdapter(adapter);
 
-                        @Override
-                        public void onFailure(Exception e) {
-                            printToResponse(e.getMessage());
-                        }
-                    });
-                } catch (Exception e) {
-                    printToResponse(e.getMessage());
-                }
-                editTextPredict.setText("");
-            }
-        });
 
-        btnReply.setOnClickListener(new View.OnClickListener() {
-            public void onClick(View v) {
-                if (previousResponse == null || (previousResponse.getDialog() != null
-                        && previousResponse.getDialog().isFinished())) {
-                    printToResponse("Nothing to reply to!");
-                    return;
-                }
-                String appId = String.valueOf(editTextAppId.getText());
-                String appKey = String.valueOf(editTextAppKey.getText());
-                String textPredict = String.valueOf(editTextPredict.getText());
-                try {
-                    LUISClient client = new LUISClient(appId, appKey, true);
-                    client.reply(textPredict, previousResponse, new LUISResponseHandler() {
-                        @Override
-                        public void onSuccess(LUISResponse response) {
-                            processResponse(response);
-                        }
-
-                        @Override
-                        public void onFailure(Exception e) {
-                            printToResponse(e.getMessage());
-                        }
-                    });
-                } catch (Exception e) {
-                    printToResponse(e.getMessage());
-                }
-                editTextPredict.setText("");
-            }
-        });
-    }
-
-    public void processResponse(LUISResponse response) {
-        printToResponse("-------------------");
-        previousResponse = response;
-        printToResponse(response.getQuery());
-        LUISIntent topIntent = response.getTopIntent();
-        printToResponse("Top Intent: " + topIntent.getName());
-        printToResponse("Entities:");
-        List<LUISEntity> entities = response.getEntities();
-        for (int i = 0; i < entities.size(); i++) {
-            printToResponse(String.valueOf(i+1)+ " - " + entities.get(i).getName());
-        }
-        LUISDialog dialog = response.getDialog();
-        if (dialog != null) {
-            printToResponse("Dialog Status: " + dialog.getStatus());
-            if (!dialog.isFinished()) {
-                printToResponse("Dialog prompt: " + dialog.getPrompt());
-            }
-        }
-    }
-
-    public void printToResponse(String text) {
-        TextView textViewResponse = (TextView) findViewById(R.id.textViewResponse);
-        chatText += "\n" + text;
-        textViewResponse.setText(chatText);
-        scrollToBottom();
-    }
-
-    public void scrollToBottom(){
-        final ScrollView scrollView = (ScrollView) findViewById(R.id.SV);
-        scrollView.postDelayed(new Runnable() {
+        adapter.registerAdapterDataObserver(new RecyclerView.AdapterDataObserver() {
             @Override
-            public void run() {
-                scrollView.fullScroll(ScrollView.FOCUS_DOWN);
+            public void onItemRangeInserted(int positionStart, int itemCount) {
+                super.onItemRangeInserted(positionStart, itemCount);
+                setScrollbar();
             }
-        }, 100);
+        });
+
+
     }
+    private void setScrollbar(){
+        recyclerView.scrollToPosition(adapter.getItemCount()-1);
+    }
+
+    @Override
+    protected void onActivityResult(int requestCode, int resultCode,
+                                    Intent data) {
+        super.onActivityResult(requestCode, resultCode, data);
+
+        switch (requestCode) {
+            case RECOGNIZE_SPEECH_ACTIVITY:
+
+                if (resultCode == RESULT_OK && null != data) {
+
+                    ArrayList<String> speech = data
+                            .getStringArrayListExtra(RecognizerIntent.
+                                    EXTRA_RESULTS);
+                    String strSpeech2Text = speech.get(0);
+                    adapter.addMensaje(new Mensaje("User",strSpeech2Text));
+
+                    Toast.makeText(this, strSpeech2Text, Toast.LENGTH_SHORT).show();
+                }
+
+                break;
+            default:
+
+                break;
+        }
+    }
+
+    public void onClickImgBtnHablar(View v) {
+
+        Intent intentActionRecognizeSpeech = new Intent(
+                RecognizerIntent.ACTION_RECOGNIZE_SPEECH);
+
+// Configura el Lenguaje (Español-México)
+        intentActionRecognizeSpeech.putExtra(
+                RecognizerIntent.EXTRA_LANGUAGE_MODEL, "es-MX");
+        try {
+            startActivityForResult(intentActionRecognizeSpeech,
+                    RECOGNIZE_SPEECH_ACTIVITY);
+        } catch (ActivityNotFoundException a) {
+            Toast.makeText(getApplicationContext(),
+                    "Tú dispositivo no soporta el reconocimiento por voz",
+                    Toast.LENGTH_SHORT).show();
+        }
+
+    }
+
+
 }
