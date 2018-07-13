@@ -20,10 +20,9 @@ import java.io.Console;
 import java.util.List;
 
 public class CargarLUIS {
-    String AppID="1500f094-435a-4b2d-8b7f-5aeab9fb74c7";
-    String AppKey="dfdc1c531aea42298eb62105fdb6d52a";
+
     String TextPredict;
-    String Intencion;
+    public String Intencion;
     String []Entidades;
     LUISResponse previousResponse = null;
 
@@ -32,22 +31,36 @@ public class CargarLUIS {
     }
 
 
-    public String[] getEntidades() {
-        return Entidades;
-    }
+    public String getEntidades(int i) {
 
+        return Entidades[i];
+    }
+    public int Longitud (){
+     return Entidades.length;
+    }
     public void setTextPredict(String textPredict) {
         TextPredict = textPredict;
     }
 
 
-    public void FuncionarLUIS(){
+    public void FuncionarLUIS(String Texto,LUISClient client){
         try {
-            LUISClient client = new LUISClient(this.AppID, this.AppKey, true);
-            client.predict(this.TextPredict, new LUISResponseHandler() {
+            client.predict(Texto, new LUISResponseHandler() {
                 @Override
                 public void onSuccess(LUISResponse response) {
-                    processResponse(response);
+
+                    previousResponse = response;
+                    LUISIntent topIntent = response.getTopIntent();
+                    Intencion=topIntent.getName ();
+                    List<LUISEntity> entities = response.getEntities();
+                    for (int i = 0; i < entities.size(); i++) {
+                        Entidades[i]=entities.get(i).getName ();
+                    }
+                    LUISDialog dialog = response.getDialog();
+                    if (dialog != null) {
+                        if (!dialog.isFinished()) {
+                        }
+                    }
                 }
 
                 @Override
